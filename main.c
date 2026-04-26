@@ -16,7 +16,7 @@ typedef struct Nodo{
 } Nodo;
 
 Nodo * crearListaVacia();
-void crearTareas(Nodo *tareasPendientes);
+void crearTareas(Nodo **tareasPendientes);
 Tarea crearTarea(int id, char *descripcion, int duracion);
 Nodo * crearNodos(Tarea tarea);
 void insertarNodo(Nodo **tareas, Nodo *nuevoNodo);
@@ -35,7 +35,7 @@ int main(){
     while(opcionPrincipal != 0){
         switch (opcionPrincipal){
         case 1:
-            crearTareas(tareasPendientes);
+            crearTareas(&tareasPendientes);
             break;
         case 2:
             if(tareasPendientes != NULL){
@@ -63,7 +63,7 @@ Nodo * crearListaVacia(){
     return NULL;
 }
 
-void crearTareas(Nodo *tareasPendientes){
+void crearTareas(Nodo **tareasPendientes){
     int bandera = 1;
     while (bandera){
         int opcion;
@@ -76,10 +76,10 @@ void crearTareas(Nodo *tareasPendientes){
             bandera = opcion;
         } else {
             int id;
-            if(tareasPendientes == NULL){
+            if(*tareasPendientes == NULL){
                 id = 1000;
             } else {
-                Nodo *aux = tareasPendientes;
+                Nodo *aux = *tareasPendientes;
                 id = aux->T.TareaID + 1;
             }
             char descripcion[100];
@@ -89,7 +89,7 @@ void crearTareas(Nodo *tareasPendientes){
             int duracion = rand() % 90 + 10;
             Tarea tarea = crearTarea(id, descripcion, duracion);
             Nodo *nuevoNodo = crearNodos(tarea);
-            insertarNodo(&tareasPendientes, nuevoNodo);
+            insertarNodo(tareasPendientes, nuevoNodo);
             printf("\nTarea cargada con exito!\n");
         }
     }
@@ -98,6 +98,7 @@ void crearTareas(Nodo *tareasPendientes){
 Tarea crearTarea(int id, char *descripcion, int duracion){
     Tarea tarea;
     tarea.TareaID = id;
+    tarea.Descripcion = (char *) malloc(sizeof(char) * (strlen(descripcion) + 1));
     strcpy(tarea.Descripcion, descripcion);
     tarea.Duracion = duracion;
     return tarea;
