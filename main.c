@@ -21,8 +21,12 @@ Tarea crearTarea(int id, char *descripcion, int duracion);
 Nodo * crearNodos(Tarea tarea);
 void insertarNodo(Nodo **tareas, Nodo *nuevoNodo);
 void mostrarTareas(Nodo *listaTareas);
-void completarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas, Tarea tareaCompletada);
+void completarTarea(Nodo **tareasPendientes, Nodo **tareasRealizadas);
 int menuPrincipal();
+void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas);
+Nodo * nodoBuscadoPorID(Nodo *tareasPendientes, int idTarea);
+Nodo * nodoBuscadoPorClave(Nodo *tareasPendientes, char *clave);
+void mostrarTareaSingular(Tarea tarea, int lista);
 
 
 int main(){
@@ -35,21 +39,27 @@ int main(){
     while(opcionPrincipal != 0){
         switch (opcionPrincipal){
         case 1:
-            crearTareas(&tareasPendientes);
+            crearTareas(&tareasPendientes); // Punto 1
             break;
         case 2:
             if(tareasPendientes != NULL){
-                mostrarTareas(tareasPendientes);
+                mostrarTareas(tareasPendientes); // Punto 3
             } else {
                 printf("\nNo se han cargado tareas. No hay nada que mostrar...");
             }
             break;
         case 3:
             if(tareasRealizadas != NULL){
-                mostrarTareas(tareasRealizadas);
+                mostrarTareas(tareasRealizadas); // Punto 3
             } else {
                 printf("\nNo se han completado tareas. No hay nada que mostrar...");
             }
+            break;
+        case 4:
+            buscarTarea(tareasPendientes, tareasRealizadas);
+            break;
+        case 5:
+            completarTarea(&tareasPendientes, &tareasRealizadas);
             break;
         default:
             break;
@@ -120,9 +130,9 @@ int menuPrincipal(){
     int opcion;
     do{
         printf("\n\n\n---- MENU PRINCIPAL -----\n");
-        printf("0. Salir\n1. Carga de tareas\n2. Consultar tareas pendientes\n3. Consultar tareas realizadas\n4. Buscar tarea\n\nElige una opcion (0-4): ");
+        printf("0. Salir\n1. Carga de tareas\n2. Consultar tareas pendientes\n3. Consultar tareas realizadas\n4. Buscar tarea\n5. Completar tareas\n\nElige una opcion (0-5): ");
         scanf("%d", &opcion);
-    }while(opcion<0 || opcion>4);
+    }while(opcion<0 || opcion>5);
     return opcion;
 
 }
@@ -135,6 +145,84 @@ void mostrarTareas(Nodo *listaTareas){
     }
 }
 
-void completarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas, Tarea tareaCompletada){
+void completarTarea(Nodo **tareasPendientes, Nodo **tareasRealizadas){
+    mostrarTareas(*tareasPendientes);
+    int idTarea;
+    printf("\n\nIngrese el ID de la tarea a completar: ");
+    scanf("%d", &idTarea);
+    Nodo *buscado = nodoBuscadoPorID(*tareasPendientes, idTarea);
+    if(buscado == NULL){
+        printf("\nLa tarea no se encuentra en la lista de pendientes.");
+    } else {
+        if(*tareasPendientes == buscado){
+            *tareasPendientes = buscado->Siguiente;
+        } else {
+            Nodo *aux = *tareasPendientes;
+            while (aux != NULL && aux->Siguiente != buscado){
+                aux = aux->Siguiente;
+            }
+            aux->Siguiente = buscado->Siguiente;
+        }
+        insertarNodo(tareasRealizadas, buscado);
+    }
+}
 
+void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas){
+    int opcion;
+    do{
+        printf("\n\n0. Salir\n1. Buscar tarea por ID.\n2. Buscar tarea por palabra clave\n\nElija una opcion: ");
+        scanf("%d", &opcion);
+    } while (opcion<0 || opcion > 2);
+    switch (opcion){
+    case 1:
+        int idABuscar;
+        printf("\n\n----- Busqueda por ID -----\nIntroduzca el ID: ");
+        scanf("%d", &idABuscar);
+        Nodo *buscado = nodoBuscadoPorID(tareasPendientes, idABuscar);
+        if(buscado == NULL){
+            buscado = nodoBuscadoPorID(tareasRealizadas, idABuscar);
+            if(buscado == NULL){
+                printf("\n----ID BUSCADO NO ENCONTRADO EN NINGUNA LISTA----");
+            } else {
+                mostrarTareaSingular(buscado->T, 1); // 1 Significa que la tarea pertenece a realizadas
+            }
+        } else {
+            mostrarTareaSingular(buscado->T, 0); // 0 Significa que la tarea pertenece a pendientes
+        }
+        break;
+    case 2:
+        break;
+    default:
+        break;
+    }
+}
+
+Nodo * nodoBuscadoPorID(Nodo *tareas, int idTarea){
+    Nodo *aux = tareas;
+    while (aux != NULL && aux->T.TareaID != idTarea){
+        aux = aux->Siguiente;
+    }
+    if(aux == NULL){
+        return NULL;
+    } else{
+        return aux;
+    }
+}
+
+Nodo * nodoBuscadoPorClave(Nodo *tareasPendientes, char *clave){
+    Nodo *aux = tareasPendientes;
+    while (strcmp(aux->T.Descripcion,clave)){
+        aux = aux->Siguiente;
+    }
+    return aux;
+}
+
+void mostrarTareaSingular(Tarea tarea, int lista){
+    printf("\nID de Tarea: %d\nDuracion: %d\nDescripcion: ", tarea.TareaID, tarea.Duracion);
+    puts(tarea.Descripcion);
+    if(lista == 0){
+        printf("Lista a la que pertenece: Pendientes");
+    } else {
+        printf("Lista a la que pertenece: Realizadas");
+    }
 }
