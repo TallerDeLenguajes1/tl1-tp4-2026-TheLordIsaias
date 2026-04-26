@@ -56,10 +56,10 @@ int main(){
             }
             break;
         case 4:
-            buscarTarea(tareasPendientes, tareasRealizadas);
+            buscarTarea(tareasPendientes, tareasRealizadas); // Punto 4
             break;
         case 5:
-            completarTarea(&tareasPendientes, &tareasRealizadas);
+            completarTarea(&tareasPendientes, &tareasRealizadas); // Punto 2
             break;
         default:
             break;
@@ -169,6 +169,7 @@ void completarTarea(Nodo **tareasPendientes, Nodo **tareasRealizadas){
 
 void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas){
     int opcion;
+    Nodo *buscado;
     do{
         printf("\n\n0. Salir\n1. Buscar tarea por ID.\n2. Buscar tarea por palabra clave\n\nElija una opcion: ");
         scanf("%d", &opcion);
@@ -178,7 +179,7 @@ void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas){
         int idABuscar;
         printf("\n\n----- Busqueda por ID -----\nIntroduzca el ID: ");
         scanf("%d", &idABuscar);
-        Nodo *buscado = nodoBuscadoPorID(tareasPendientes, idABuscar);
+        buscado = nodoBuscadoPorID(tareasPendientes, idABuscar);
         if(buscado == NULL){
             buscado = nodoBuscadoPorID(tareasRealizadas, idABuscar);
             if(buscado == NULL){
@@ -191,6 +192,21 @@ void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas){
         }
         break;
     case 2:
+        char claveABuscar[20];
+        printf("----- Busqueda por Palabra Clave -----\nIntroduzca la Clave: ");
+        getchar();
+        gets(claveABuscar);
+        buscado = nodoBuscadoPorClave(tareasPendientes, claveABuscar);
+        if(buscado == NULL){
+            buscado = nodoBuscadoPorClave(tareasRealizadas, claveABuscar);
+            if(buscado == NULL){
+                printf("\n----CLAVE BUSCADA NO ENCONTRADA EN NINGUNA LISTA----");
+            } else {
+                mostrarTareaSingular(buscado->T, 1); // 1 Significa que la tarea pertenece a realizadas
+            }
+        } else {
+            mostrarTareaSingular(buscado->T, 0); // 0 Significa que la tarea pertenece a pendientes
+        }
         break;
     default:
         break;
@@ -209,10 +225,15 @@ Nodo * nodoBuscadoPorID(Nodo *tareas, int idTarea){
     }
 }
 
-Nodo * nodoBuscadoPorClave(Nodo *tareasPendientes, char *clave){
+Nodo * nodoBuscadoPorClave(Nodo *tareasPendientes, char *clave){ // Solo devuelve la primera tarea que contenga el string de la clave. Consultar
     Nodo *aux = tareasPendientes;
-    while (strcmp(aux->T.Descripcion,clave)){
+    while (aux != NULL && strstr(aux->T.Descripcion, clave) == NULL){
         aux = aux->Siguiente;
+    }
+    if(aux == NULL){
+        return NULL;
+    } else{
+        return aux;
     }
     return aux;
 }
