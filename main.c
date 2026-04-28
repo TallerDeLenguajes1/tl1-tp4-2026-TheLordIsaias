@@ -27,6 +27,7 @@ void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas);
 Nodo * nodoBuscadoPorID(Nodo *tareasPendientes, int idTarea);
 Nodo * nodoBuscadoPorClave(Nodo *tareasPendientes, char *clave);
 void mostrarTareaSingular(Tarea tarea, int lista);
+void liberarMemoria(Nodo **tareas);
 
 
 int main(){
@@ -66,6 +67,8 @@ int main(){
         }
         opcionPrincipal = menuPrincipal();
     }
+    liberarMemoria(&tareasPendientes);
+    liberarMemoria(&tareasRealizadas);
     return 0;
 }
 
@@ -170,13 +173,14 @@ void completarTarea(Nodo **tareasPendientes, Nodo **tareasRealizadas){
 void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas){
     int opcion;
     Nodo *buscado;
+    int idABuscar;
+    char claveABuscar[20];
     do{
         printf("\n\n0. Salir\n1. Buscar tarea por ID.\n2. Buscar tarea por palabra clave\n\nElija una opcion: ");
         scanf("%d", &opcion);
     } while (opcion<0 || opcion > 2);
     switch (opcion){
     case 1:
-        int idABuscar;
         printf("\n\n----- Busqueda por ID -----\nIntroduzca el ID: ");
         scanf("%d", &idABuscar);
         buscado = nodoBuscadoPorID(tareasPendientes, idABuscar);
@@ -192,7 +196,7 @@ void buscarTarea(Nodo *tareasPendientes, Nodo *tareasRealizadas){
         }
         break;
     case 2:
-        char claveABuscar[20];
+        
         printf("----- Busqueda por Palabra Clave -----\nIntroduzca la Clave: ");
         getchar();
         gets(claveABuscar);
@@ -246,4 +250,18 @@ void mostrarTareaSingular(Tarea tarea, int lista){
     } else {
         printf("Lista a la que pertenece: Realizadas");
     }
+}
+
+void liberarMemoria(Nodo **tareas){
+    Nodo * aux = *tareas;
+    Nodo * pAux;
+    while(aux->Siguiente != NULL){
+        pAux = aux;
+        aux = aux->Siguiente;
+        free(pAux->T.Descripcion);
+        free(pAux);
+    }
+    free(aux->T.Descripcion);
+    free(aux);
+    *tareas = NULL;
 }
